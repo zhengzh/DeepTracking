@@ -33,6 +33,11 @@ function SensorData.__len(self)
 end
 
 function SensorData.__index(self, i)
+	-- every laser distance to origin, so dist > grid_dist, visible
+	-- dist < grid_dist, not visible
+	-- dist == grid_dist, obstacles
+	-- this is 360 view laser
+	-- 360 - laser start
 	local dist = self.data[i]:index(1, self.index):reshape(self.height, self.width)
 	local input = torch.FloatTensor(2, self.height, self.width)
 	input[1] = torch.lt(torch.abs(dist - self.dist), params.grid_step * 0.7071)
