@@ -91,7 +91,35 @@ def get_input(obs, vis, dx, dy, gh, gw, ih, iw):
 
 
 def load_sensor_data(file, params):
+
+    # [pos, laser], num, seq_len, 3|N
+    data = np.load(file)
+    pos, laser = data['pos'], data['laser']
+
+
+def process_data(pos, laser, params):
+
+    # pos [num, seq_len, 3]
+    # laser [num, seq_len, 720]
+    
+    pos = pos - pos[:, 0].reshape((-1, 1))
+    dx, dy, dyaw = pos[:, :, 0], pos[:, :, 1], pose[:, :, 2]
+
+    n, l, _ = laser.shape
+    
+    for i in range(n):
+        for j in range(l):
+            
+            get_360_laser(laser, 0, params)
+
+    
+
     pass
+    # x1-x2, y1-y2, rotate(-yaw2), yaw1-yaw2
+    # reference to first laser frame
+    # -> dx, dy, dyaw
+
+
 
 #%%
 import matplotlib.pyplot as plt
