@@ -13,6 +13,9 @@ class params:
     num_beam = int((angle_max - angle_min)/laser_step) # make it int
     gh = 100 # y
     gw = 100 # x
+
+    ih = 100
+    iw = 100
     
     g_step= 0.1
     # (x-gw/2)*g_step
@@ -76,16 +79,19 @@ def laser_to_grid(laser, gs):
 
     return obs, vis
 
-def get_input(obs, vis, dx, dy, gh, gw, ih, iw):
+def get_input(obs, vis, dx, dy, ih, iw):
 
-    big_map = np.zeros(2, 2*gh, 2*gw)
+    gh, gw = obs.shape
+    big_map = np.zeros((2, 2*gh, 2*gw))
     
     sh = gh//2 + dy
     sw = gw//2 + dx
 
-    big_map[:, sh:sh+gh, sw:sw+gw] = np.stack(obs, vis)
+    big_map[:, sh:sh+gh, sw:sw+gw] = np.stack((obs, vis))
 
-    input = big_map[:, -ih//2:ih//2, -iw//2:iw//2]
+    sih = gh-ih//2
+    siw = gw-iw//2
+    input = big_map[:, sih:sih+ih, siw:siw+iw]
 
     return input
 
@@ -109,12 +115,11 @@ def process_data(pos, laser, params):
     
     for i in range(n):
         for j in range(l):
-            
-            get_360_laser(laser, 0, params)
+            laser = laser[i, j, :]
+            yaw = dyaw[i, j, :]
+            laser = get_360_laser(laser, yaw, params)
+            obs, vis = laser_to_grid(laser, params.g_step)
 
-    
-
-    pass
     # x1-x2, y1-y2, rotate(-yaw2), yaw1-yaw2
     # reference to first laser frame
     # -> dx, dy, dyaw
@@ -131,6 +136,11 @@ def test():
     
     laser = get_360_laser(beams, 0, params)
     obs, vis = laser_to_grid(laser, params.g_step)
+    ih, iw = params.ih, params.iw
+    input = get_input(obs, vis, 0, 0, ih, iw)
+    
+    import ipdb; ipdb.set_trace()
+    return input
     plt.imshow(obs, cmap='Greys')
     plt.imshow(vis, cmap='Greys')
 
