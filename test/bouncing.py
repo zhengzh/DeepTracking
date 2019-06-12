@@ -41,18 +41,37 @@ def step(balls):
     for ball in balls:
         ball.move()
         ball.draw(pen)
-        
-    return image
+    
+    return np.array(image)[:,:,0]>100
 
 import matplotlib.pyplot as plt
 
 def main(balls):
+    pass
+
+def test(balls):
     for i in range(1000):
         image = step(balls)
-        
-        # plt.imshow(image)
-        # plt.pause(0.01)
+        plt.imshow(image)
+        plt.pause(0.01)
+
+import numpy as np
+def generate_data():
+    
+    n = 1
+    l = 10
+    
+    data = np.zeros([n, l , w, h], dtype=np.uint8)
+
+    for num in range(n):
+        balls = [Ball() for _ in range(10)]
+
+        for t in range(l):
+            image = step(balls)
+            data[num, t, :, :] = image
+    
+    np.save('./save/data2', data)
 
 if __name__ == '__main__':
-    main(balls)
+    generate_data()
     

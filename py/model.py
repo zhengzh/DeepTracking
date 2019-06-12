@@ -7,6 +7,8 @@ class RNNCell(nn.Module):
     
     def __init__(self):
 
+        super(RNNCell, self).__init__()
+
         self.embed = nn.Conv2d(2, 16,(7, 7), (1,1), (3,3))
         self.hidden = nn.Conv2d(48, 32, (7,7),(1,1),(3,3))
         self.output = nn.Conv2d(32, 1, (7, 7), (1,1), (3,3))
@@ -23,6 +25,9 @@ class RNNCell(nn.Module):
 class RNN(nn.Module):
     
     def __init__(self, width, height):
+
+        super(RNN, self).__init__()
+
         self.rnn = RNNCell()
     
     def forward(self, X):
