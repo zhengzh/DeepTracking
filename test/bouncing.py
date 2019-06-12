@@ -42,7 +42,8 @@ def step(balls):
         ball.move()
         ball.draw(pen)
     
-    return np.array(image)[:,:,0]>100
+    res = np.array(image)[:,:,0]>100
+    return res
 
 import matplotlib.pyplot as plt
 
@@ -68,10 +69,13 @@ def generate_data():
 
         for t in range(l):
             image = step(balls)
+            # plt.imshow(image)
+            # plt.pause(0.1)
             data[num, t, :, :] = image
     
     np.save('./save/data2', data)
 
 if __name__ == '__main__':
     generate_data()
+    # test(balls)
     

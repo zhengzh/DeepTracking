@@ -7,7 +7,6 @@ from model import RNN
 import numpy as np
 
 
-
 epochs = 1000
 
 criterion = nn.BCELoss(reduction='sum')
@@ -30,6 +29,7 @@ index = np.arange(n)
 
 
 def getSequence(i):
+    
     input = data[i].unsqueeze(1).unsqueeze(1).to(device)
     return input
 
@@ -42,11 +42,36 @@ def dropotuInput(target):
     return input
 
 
-def evaluate(weights):
-    input = getSequence(1)
+from PIL import Image
 
-    model(input)
-    pass
+import matplotlib.pyplot as plt
+
+def img_grey(data):
+    data = data.astype(np.uint8)
+    return Image.fromarray(data * 255, mode='L').convert('1')
+
+def evaluate(weights):
+    input = getSequence(0)
+
+    model.load_state_dict(weights)
+
+    with torch.no_grad():
+        output, hidden = model(input)
+    
+    input = input.squeeze()
+    output = output.squeeze()
+
+    input = input.cpu().numpy()
+    output = output.cpu().numpy()
+
+    n, h, w = input.shape
+
+    for i in range(n):
+        x = img_grey(input[i]>0.5)
+        y = img_grey(output[i]>0.5)
+
+        x.save('./save/video/input_%i.bmp' % (i))
+        y.save('./save/video/output_%i.bmp' % (i))
 
 
 def train():
@@ -63,21 +88,36 @@ def train():
     
     return loss.item()
 
-total_cost = 0
 
 import os
 
 os.makedirs('./save/weights', exist_ok=True)
-os.makedirs('.save/video', exist_ok=True)
+os.makedirs('./save/video', exist_ok=True)
 
-for k in range(1, epochs+1):
 
-    cost = train()
+def main():
+    total_cost = 0
 
-    total_cost += cost
+    for k in range(1, epochs+1):
 
-    if k % 100 == 0:
-        print('Iteration % d, cost: %f' % (k, total_cost/1000))
-        total_cost = 0
-        
-        torch.save(model.state_dict(),  './save/weights/%d.dat' % (k))
+        cost = train()
+
+        total_cost += cost
+
+        if k % 100 == 0:
+            print('Iteration % d, cost: %f' % (k, total_cost/1000))
+            total_cost = 0
+            
+            torch.save(model.state_dict(),  './save/weights/%d.dat' % (k))
+
+
+def test():
+    weight = torch.load('./save/weights/1000.dat')
+    evaluate(weight)
+    pass
+
+
+if __name__ == '__main__':
+    test()
+    # main()
+    
