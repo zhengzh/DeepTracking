@@ -57,14 +57,15 @@ def test(balls):
         plt.pause(0.01)
 
 import numpy as np
-def generate_data():
+from tqdm import tqdm
+def generate_data(args):
     
-    n = 1
-    l = 10
+    n = args.num
+    l = args.seq_len
     
     data = np.zeros([n, l , w, h], dtype=np.uint8)
 
-    for num in range(n):
+    for num in tqdm(range(n)):
         balls = [Ball() for _ in range(10)]
 
         for t in range(l):
@@ -75,7 +76,14 @@ def generate_data():
     
     np.save('./save/data2', data)
 
+import argparse
 if __name__ == '__main__':
-    generate_data()
+    parser = argparse.ArgumentParser(description='Generating moving ball')
+    parser.add_argument('--num', type=int, default=100)
+    parser.add_argument('--seq_len', type=int, default=100)
+    
+    args = parser.parse_args()
+    generate_data(args)
+
     # test(balls)
     

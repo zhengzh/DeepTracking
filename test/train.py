@@ -94,11 +94,14 @@ import os
 os.makedirs('./save/weights', exist_ok=True)
 os.makedirs('./save/video', exist_ok=True)
 
+from tqdm import tqdm
 
-def main():
+def main(args):
     total_cost = 0
 
-    for k in range(1, epochs+1):
+    epochs = args.epochs
+
+    for k in tqdm(range(1, epochs+1)):
 
         cost = train()
 
@@ -108,6 +111,7 @@ def main():
             print('Iteration % d, cost: %f' % (k, total_cost/1000))
             total_cost = 0
             
+            evaluate(model.state_dict())
             torch.save(model.state_dict(),  './save/weights/%d.dat' % (k))
 
 
@@ -116,8 +120,11 @@ def test():
     evaluate(weight)
     pass
 
+import argparse
 
 if __name__ == '__main__':
-    test()
-    # main()
+    parser = argparse.ArgumentParser(description='Generating moving ball')
+    parser.add_argument('--epochs', type=int, default=1000)
+    args = parser.parse_args()
+    main(args)
     
