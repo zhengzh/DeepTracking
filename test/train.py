@@ -18,6 +18,14 @@ data = np.load('./save/data2.npy')
 
 n, l, w, h = data.shape
 model = RNN(w, h)
+
+# if torch.cuda.device_count() > 0:
+#   print("Let's use", torch.cuda.device_count(), "GPUs!")
+#   model = nn.DataParallel(model)
+
+# weight = torch.load('./save/weights/1000.dat')
+# model.load_state_dict(weight)
+
 model.to(device)
 
 data = torch.from_numpy(data).float()
@@ -36,7 +44,7 @@ def getSequence(i):
 def dropotuInput(target):
     input = target.clone()
     for i, image in enumerate(input):
-        if (i-1) % 10 >= 5:
+        if (i) % 4 >= 2:
             image.zero_()
 
     return input
@@ -51,23 +59,26 @@ def img_grey(data):
     return Image.fromarray(data * 255, mode='L').convert('1')
 
 def evaluate(weights):
-    input = getSequence(0)
+    target = getSequence(0)
+    input = dropotuInput(target)
 
     model.load_state_dict(weights)
 
     with torch.no_grad():
         output, hidden = model(input)
     
+    target = target.squeeze()
     input = input.squeeze()
     output = output.squeeze()
 
+    target = target.cpu().numpy()
     input = input.cpu().numpy()
     output = output.cpu().numpy()
 
     n, h, w = input.shape
 
     for i in range(n):
-        x = img_grey(input[i]>0.5)
+        x = img_grey(target[i]>0.5)
         y = img_grey(output[i]>0.5)
 
         x.save('./save/video/input_%i.bmp' % (i))
@@ -99,6 +110,7 @@ from tqdm import tqdm
 def main(args):
     total_cost = 0
 
+    log = 100
     epochs = args.epochs
 
     for k in tqdm(range(1, epochs+1)):
@@ -107,8 +119,8 @@ def main(args):
 
         total_cost += cost
 
-        if k % 100 == 0:
-            print('Iteration % d, cost: %f' % (k, total_cost/1000))
+        if k % log == 0:
+            print('Iteration % d, cost: %f' % (k, total_cost/log))
             total_cost = 0
             
             evaluate(model.state_dict())
@@ -124,7 +136,8 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generating moving ball')
-    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--epochs', type=int, default=10000)
     args = parser.parse_args()
     main(args)
+    test()
     
