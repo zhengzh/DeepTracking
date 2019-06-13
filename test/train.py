@@ -44,7 +44,7 @@ def getSequence(i):
 def dropotuInput(target):
     input = target.clone()
     for i, image in enumerate(input):
-        if (i) % 4 >= 2:
+        if (i) % 10 >= 5:
             image.zero_()
 
     return input

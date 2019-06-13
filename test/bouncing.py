@@ -6,7 +6,7 @@ def draw_circle(pen, x, y, r):
 
 from random import random
 
-w, h = 200, 200
+w, h = 100, 100
 
 class Ball:
     def __init__(self):
@@ -80,7 +80,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generating moving ball')
     parser.add_argument('--num', type=int, default=100)
-    parser.add_argument('--seq_len', type=int, default=100)
+    parser.add_argument('--seq_len', type=int, default=50)
     
     args = parser.parse_args()
     generate_data(args)
