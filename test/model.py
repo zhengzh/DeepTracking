@@ -41,13 +41,15 @@ class RNN(nn.Module):
         self.width = width
         self.height = height
         self.rnn = RNNCell()
-        self.h = nn.Parameter(torch.zeros(1, 32, self.width, self.height))
+        
+        self.register_buffer('h', torch.zeros(1, 32, self.width, self.height))
     
     def forward(self, X):
-
+    
         # X[seq_len, batch, channel, width, height]
-        
         h = self.h
+        h.zero_()
+
         h_list = []
         y_list = []
         seq_len = X.shape[0]

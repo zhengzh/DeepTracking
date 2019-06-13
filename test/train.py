@@ -28,6 +28,12 @@ model = RNN(w, h)
 
 model.to(device)
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+print('total parameters: %d' % count_parameters(model))
+
+
 data = torch.from_numpy(data).float()
 
 
@@ -38,6 +44,8 @@ index = np.arange(n)
 
 def getSequence(i):
     
+    # if isinstance(i, iter):
+        
     input = data[i].unsqueeze(1).unsqueeze(1).to(device)
     return input
 
