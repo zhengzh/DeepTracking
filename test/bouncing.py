@@ -6,7 +6,8 @@ def draw_circle(pen, x, y, r):
 
 from random import random
 
-w, h = 100, 100
+w, h = 50, 50
+# w, h = 100, 100
 
 class Ball:
     def __init__(self):
@@ -15,7 +16,7 @@ class Ball:
         self.y = random() * (h-20) + 10
         self.vx = random() * v +1
         self.vy = random() * v + 1
-        self.r = random() * 5 + 5
+        self.r = random() * 3 + 1
     
     def move(self):
         self.x += self.vx
@@ -83,7 +84,7 @@ if __name__ == '__main__':
     parser.add_argument('--seq_len', type=int, default=50)
     
     args = parser.parse_args()
-    generate_data(args)
+    # generate_data(args)
 
-    # test(balls)
+    test(balls)
     
