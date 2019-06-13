@@ -3,8 +3,9 @@ from pylab import *
 
 import os
 
-ifs = ['input_%d.bmp' % (i) for i in range(0, 100)]
-ofs = ['output_%d.bmp' % (i) for i in range(0, 100)]
+num = 50
+ifs = ['input_%d.bmp' % (i) for i in range(0, num)]
+ofs = ['output_%d.bmp' % (i) for i in range(0, num)]
 
 d = 'save/video/'
 ips = [Image.open(d+i) for i in ifs]

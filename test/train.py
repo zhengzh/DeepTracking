@@ -23,8 +23,8 @@ model = RNN(w, h)
 #   print("Let's use", torch.cuda.device_count(), "GPUs!")
 #   model = nn.DataParallel(model)
 
-# weight = torch.load('./save/weights/1000.dat')
-# model.load_state_dict(weight)
+#weight = torch.load('./save/weights/100000.dat')
+#model.load_state_dict(weight)
 
 model.to(device)
 
@@ -37,7 +37,7 @@ print('total parameters: %d' % count_parameters(model))
 data = torch.from_numpy(data).float()
 
 
-model_optim = optim.Adam(model.parameters(), lr=0.001)
+model_optim = optim.Adam(model.parameters(), lr=0.0001)
 
 index = np.arange(n)
 
@@ -66,8 +66,8 @@ def img_grey(data):
     data = data.astype(np.uint8)
     return Image.fromarray(data * 255, mode='L').convert('1')
 
-def evaluate(weights):
-    target = getSequence(0)
+def evaluate(weights,idx=0):
+    target = getSequence(idx)
     input = dropotuInput(target)
 
     model.load_state_dict(weights)
@@ -136,16 +136,16 @@ def main(args):
 
 
 def test():
-    weight = torch.load('./save/weights/1000.dat')
-    evaluate(weight)
+    weight = torch.load('./save/weights/100000.dat')
+    evaluate(weight,idx=1)
     pass
 
 import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generating moving ball')
-    parser.add_argument('--epochs', type=int, default=10000)
+    parser.add_argument('--epochs', type=int, default=100000)
     args = parser.parse_args()
     main(args)
-    test()
+    #test()
     
