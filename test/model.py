@@ -44,7 +44,7 @@ class RNN(nn.Module):
         self.height = height
         self.rnn = RNNCell()
         
-        # self.register_buffer('h', torch.zeros(1, 32, self.width, self.height))
+        self.register_buffer('h', torch.zeros(1, 32, self.width, self.height))
     
     def forward(self, X):
     
