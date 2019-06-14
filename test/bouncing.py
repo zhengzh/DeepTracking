@@ -68,7 +68,7 @@ def generate_data(args):
     data = np.zeros([n, l , w, h], dtype=np.uint8)
 
     for num in tqdm(range(n)):
-        balls = [Ball() for _ in range(10)]
+        balls = [Ball() for _ in range(5)]
 
         for t in range(l):
             image = step(balls)

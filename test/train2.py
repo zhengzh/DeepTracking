@@ -127,7 +127,7 @@ def main(args):
 
     for k in tqdm(range(1, epochs+1)):
 
-        cost = train()
+        cost = train(args)
 
         total_cost += cost
 
