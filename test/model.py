@@ -44,14 +44,14 @@ class RNN(nn.Module):
         self.height = height
         self.rnn = RNNCell()
         
-        self.register_buffer('h', torch.zeros(1, 32, self.width, self.height))
+        self.register_buffer('h', torch.zeros(10, 32, self.width, self.height))
     
     def forward(self, X):
     
         # X[seq_len, batch, channel, width, height]
-        # b = X[1]
+        b = X.shape[1]
         # h = torch.zeros(1, 32, self.width, self.height)
-        h = self.h
+        h = self.h[:b]
 
         h_list = []
         y_list = []

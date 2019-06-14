@@ -96,8 +96,9 @@ def evaluate(weights,idx=0):
         y.save('./save/video/output_%i.bmp' % (i))
 
 
-def train():
-    target = getSequence(np.random.randint(0, n, 4))
+def train(args):
+    b = args.batch_size
+    target = getSequence(np.random.randint(0, n, b))
     input = dropotuInput(target)
     
     output, hidden = model(input)
@@ -148,6 +149,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generating moving ball')
     parser.add_argument('--epochs', type=int, default=100000)
+    parser.add_argument('--batch_size', type=int, default=12)
     args = parser.parse_args()
     main(args)
     #test()
