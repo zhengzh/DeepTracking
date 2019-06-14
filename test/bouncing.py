@@ -85,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('--seq_len', type=int, default=50)
     
     args = parser.parse_args()
-    # generate_data(args)
+    generate_data(args)
 
-    test(balls)
+    # test(balls)
     
