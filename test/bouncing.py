@@ -11,13 +11,13 @@ w, h = 50, 50
 
 class Ball:
     def __init__(self):
-        v = 7
+        v = 2
         self.x = random() * (w-20) + 10
         self.y = random() * (h-20) + 10
-        self.vx = random() * v +1
-        self.vy = random() * v + 1
+        self.vx = random() * v
+        self.vy = random() * v
         #self.r = random() * 3 + 1
-        self.r = 1.5
+        self.r = 1
     
     def move(self):
         self.x += self.vx
@@ -33,7 +33,7 @@ class Ball:
         draw_circle(pen, self.x, self.y, self.r)
         
 
-balls = [Ball() for i in range(15)]
+balls = [Ball() for i in range(10)]
 
 
 def step(balls):
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('--seq_len', type=int, default=50)
     
     args = parser.parse_args()
-    generate_data(args)
+    # generate_data(args)
 
-    # test(balls)
+    test(balls)
     
