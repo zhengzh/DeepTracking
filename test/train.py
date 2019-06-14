@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
-from model import RNN
+from model import RNN2 as RNN
 import numpy as np
 
 
@@ -44,8 +44,6 @@ index = np.arange(n)
 
 def getSequence(i):
     
-    # if isinstance(i, iter):
-        
     input = data[i].unsqueeze(1).unsqueeze(1).to(device)
     return input
 
