@@ -34,6 +34,8 @@ class RNNCell(nn.Module):
         
         return h, y
 
+#hn = 64
+hn = 128
 class RNNCell2(nn.Module):
     
     def __init__(self):
@@ -42,22 +44,22 @@ class RNNCell2(nn.Module):
 
         k=7
         p=(k-1)//2
-        self.l1 = nn.Conv2d(17, 16,(3, 3), (1,1), (1,1), (1, 1))
-        self.l2 = nn.Conv2d(32, 16, (3,3),(1,1),(2, 2), dilation=(2, 2))
-        self.l3 = nn.Conv2d(32, 16, (3,3),(1,1),(4,4), dilation=(4, 4))
-        self.output = nn.Conv2d(16, 1, (3, 3), stride=(1, 1), padding=(1, 1))
+        self.l1 = nn.Conv2d(hn+1, hn,(3, 3), (1,1), (1,1), (1, 1))
+        self.l2 = nn.Conv2d(2*hn, hn, (3,3),(1,1),(2, 2), dilation=(2, 2))
+        self.l3 = nn.Conv2d(2*hn, hn, (3,3),(1,1),(4,4), dilation=(4, 4))
+        self.output = nn.Conv2d(hn, 1, (3, 3), stride=(1, 1), padding=(1, 1))
     
     def forward(self, x, h0, h1, h2):
         
         x = torch.cat((x, h0), 1)
     
-        h0 = torch.sigmoid(self.l1(x))
+        h0 = torch.relu(self.l1(x))
         # x is [batch, channel, width, height]
 
         x = torch.cat((h0, h1), 1)
-        h1 = torch.sigmoid(self.l2(x))
+        h1 = torch.relu(self.l2(x))
         x = torch.cat((h1, h2), 1)
-        h2 = torch.sigmoid(self.l3(x))
+        h2 = torch.relu(self.l3(x))
 
         y = torch.sigmoid(self.output(h2))
         
@@ -74,7 +76,7 @@ class RNN2(nn.Module):
         self.height = height
         self.rnn = RNNCell2()
         
-        self.register_buffer('h', torch.zeros(10, 16, self.width, self.height))
+        self.register_buffer('h', torch.zeros(10, hn, self.width, self.height))
     
     def forward(self, X):
     
