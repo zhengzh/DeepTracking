@@ -34,8 +34,10 @@ class RNNCell(nn.Module):
         
         return h, y
 
-#hn = 64
+# hn = 32
+# hn = 64
 hn = 128
+
 class RNNCell2(nn.Module):
     
     def __init__(self):
@@ -51,11 +53,9 @@ class RNNCell2(nn.Module):
     
     def forward(self, x, h0, h1, h2):
         
-        x = torch.cat((x, h0), 1)
-    
-        h0 = torch.relu(self.l1(x))
         # x is [batch, channel, width, height]
-
+        x = torch.cat((x, h0), 1)
+        h0 = torch.relu(self.l1(x))
         x = torch.cat((h0, h1), 1)
         h1 = torch.relu(self.l2(x))
         x = torch.cat((h1, h2), 1)
@@ -76,13 +76,18 @@ class RNN2(nn.Module):
         self.height = height
         self.rnn = RNNCell2()
         
-        self.register_buffer('h', torch.zeros(10, hn, self.width, self.height))
+        # self.register_buffer('h', torch.zeros(10, hn, self.width, self.height))
     
     def forward(self, X):
     
         # X[seq_len, batch, channel, width, height]
-        b = X.shape[1]
-        h0 = self.h[:b]
+        # b = X.shape[1]
+        # h0 = self.h[:b]
+
+        sh = list(X[0].shape)
+        sh[1] = hn
+        h0 = X[0].new_zeros(sh)
+
         h1 = h0
         h2 = h0
         h_list = []
@@ -104,14 +109,17 @@ class RNN(nn.Module):
         self.height = height
         self.rnn = RNNCell()
         
-        self.register_buffer('h', torch.zeros(10, 32, self.width, self.height))
+        # self.register_buffer('h', torch.zeros(10, 32, self.width, self.height))
     
     def forward(self, X):
     
         # X[seq_len, batch, channel, width, height]
-        b = X.shape[1]
+        # b = X.shape[1]
         # h = torch.zeros(1, 32, self.width, self.height)
-        h = self.h[:b]
+        # h = self.h[:b]
+        
+        h = X[0].clone()
+        h.zero_()
 
         h_list = []
         y_list = []

@@ -6,7 +6,8 @@ def draw_circle(pen, x, y, r):
 
 from random import random
 
-w, h = 50, 50
+w, h = 25, 25
+# w, h = 50, 50
 # w, h = 100, 100
 
 class Ball:
