@@ -52,10 +52,10 @@ def getSequence(i):
     return input
 
 
-def dropotuInput(target):
+def dropotuInput(target, interval=10):
     input = target.clone()
     for i, image in enumerate(input):
-        if (i) % 10 >= 5:
+        if (i) % interval >= interval/2.0:
             image.zero_()
 
     return input
@@ -71,7 +71,7 @@ def img_grey(data):
 
 def evaluate(weights,idx=0):
     target = getSequence(idx)
-    input = dropotuInput(target)
+    input = dropotuInput(target, interval=20)
 
     model.load_state_dict(weights)
 
