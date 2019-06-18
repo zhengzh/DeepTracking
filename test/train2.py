@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
-from model import RNN
+from model import RNN2
 import numpy as np
 
 
@@ -17,11 +17,11 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 data = np.load('./save/data2.npy')
 
 n, l, w, h = data.shape
-model = RNN(w, h)
+model = RNN2(w, h)
 
 if torch.cuda.device_count() > 0:
   print("Let's use", torch.cuda.device_count(), "GPUs!")
-  model = nn.DataParallel(model, dim=1)
+  model = nn.DataParallel(model, dim=1, device_ids=[0])
 
 #weight = torch.load('./save/weights/100000.dat')
 #model.load_state_dict(weight)
@@ -149,7 +149,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generating moving ball')
     parser.add_argument('--epochs', type=int, default=100000)
-    parser.add_argument('--batch_size', type=int, default=12)
+    parser.add_argument('--batch_size', type=int, default=32)
     args = parser.parse_args()
     main(args)
     #test()
