@@ -23,8 +23,8 @@ model = RNN(w, h)
 #   print("Let's use", torch.cuda.device_count(), "GPUs!")
 #   model = nn.DataParallel(model)
 
-#weight = torch.load('./save/weights/100000.dat')
-#model.load_state_dict(weight)
+weight = torch.load('./save/weights/100000.dat')
+model.load_state_dict(weight)
 
 model.to(device)
 
@@ -41,10 +41,11 @@ model_optim = optim.Adam(model.parameters(), lr=0.0001)
 
 index = np.arange(n)
 
+data = data.to(device).unsqueeze(2).unsqueeze(2)
 
 def getSequence(i):
     
-    input = data[i].unsqueeze(1).unsqueeze(1).to(device)
+    input = data[i]
     return input
 
 
@@ -66,7 +67,7 @@ def img_grey(data):
 
 def evaluate(weights,idx=0):
     target = getSequence(idx)
-    input = dropotuInput(target, interval=20)
+    input = dropotuInput(target, interval=10)
 
 
     model.load_state_dict(weights)

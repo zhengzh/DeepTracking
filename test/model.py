@@ -35,8 +35,8 @@ class RNNCell(nn.Module):
         return h, y
 
 # hn = 32
-# hn = 64
-hn = 128
+hn = 64
+# hn = 128
 
 class RNNCell2(nn.Module):
     
@@ -64,9 +64,7 @@ class RNNCell2(nn.Module):
         y = torch.sigmoid(self.output(h2))
         
         return h0, h1, h2, y
-
-
-hn = 16
+        
 
 class RNNCell3(nn.Module):
     
@@ -107,7 +105,7 @@ class RNN2(nn.Module):
 
         self.width = width
         self.height = height
-        self.rnn = RNNCell3()
+        self.rnn = RNNCell2()
         
         # self.register_buffer('h', torch.zeros(10, hn, self.width, self.height))
     
