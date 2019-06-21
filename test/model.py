@@ -100,14 +100,14 @@ class RNNCell3(nn.Module):
 
 class GRUCell(nn.Module):
     
-    def __init__(self, dil, hn2, pad):
+    def __init__(self, dil, xn, pad):
 
         super(GRUCell, self).__init__()
 
         hn = 32
-        self.z = nn.Conv2d(hn+hn2, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
-        self.r = nn.Conv2d(hn+hn2, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
-        self.h = nn.Conv2d(hn+hn2, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
+        self.z = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
+        self.r = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
+        self.h = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
     
     
     def forward(self, x, h):
@@ -156,7 +156,7 @@ class GRURNN(nn.Module):
             h0 = self.l1(X[i], h0)
             h1 = self.l2(h0, h1)
             h2 = self.l3(h1, h2)
-            y = self.out(h2)
+            y = torch.sigmoid(self.out(h2))
             h_list.append([h0, h1, h2])
             y_list.append(y)
 
