@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
-from model import RNN2 as RNN
+from model import GRURNN
 import numpy as np
 
 
@@ -17,14 +17,14 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 data = np.load('./save/data2.npy')
 
 n, l, w, h = data.shape
-model = RNN(w, h)
+model = GRURNN()
 
 # if torch.cuda.device_count() > 0:
 #   print("Let's use", torch.cuda.device_count(), "GPUs!")
 #   model = nn.DataParallel(model)
 
-weight = torch.load('./save/weights/100000.dat')
-model.load_state_dict(weight)
+# weight = torch.load('./save/weights/100000.dat')
+# model.load_state_dict(weight)
 
 model.to(device)
 

@@ -98,6 +98,72 @@ class RNNCell3(nn.Module):
         
         return h0, h1, h2, y
 
+class GRUCell(nn.Module):
+    
+    def __init__(self, dil, hn2, pad):
+
+        super(GRUCell, self).__init__()
+
+        hn = 32
+        self.z = nn.Conv2d(hn+hn2, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
+        self.r = nn.Conv2d(hn+hn2, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
+        self.h = nn.Conv2d(hn+hn2, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
+    
+    
+    def forward(self, x, h):
+        
+        # x is [batch, channel, width, height]
+
+        hx = torch.cat((x, h), 1)
+        z = torch.sigmoid(self.z(hx))
+        r = torch.sigmoid(self.r(hx))
+        h1 = torch.cat((r*h, x), 1)
+        h1 = torch.tanh(self.h(h1))
+        
+        o = (1-z)*h + z * h1
+        
+        return o
+
+
+class GRURNN(nn.Module):
+    
+    def __init__(self):
+
+        super(GRURNN, self).__init__()
+
+        self.hn = 32
+
+        self.l1 = GRUCell(1, 1, 1)
+        self.l2 = GRUCell(2, self.hn, 2)
+        self.l3 = GRUCell(4, self.hn, 4)
+
+        self.out = nn.Conv2d(self.hn, 1, (3, 3), stride=(1, 1), padding=(1, 1))
+    
+    def forward(self, X):
+        
+        # x is [batch, channel, width, height]
+        sh = list(X[0].shape)
+        sh[1] = self.hn
+        h0 = X[0].new_zeros(sh)
+        h1 = h2 = h0
+    
+        h_list = []
+        y_list = []
+        seq_len = X.shape[0]
+
+        for i in range(seq_len):
+
+            h0 = self.l1(X[i], h0)
+            h1 = self.l2(h0, h1)
+            h2 = self.l3(h1, h2)
+            y = self.out(h2)
+            h_list.append([h0, h1, h2])
+            y_list.append(y)
+
+        y = torch.stack(y_list)
+        return y, h_list
+
+
 class RNN2(nn.Module):
     
     def __init__(self, width, height):
