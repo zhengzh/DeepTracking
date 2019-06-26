@@ -13,10 +13,22 @@ criterion = nn.BCELoss(reduction='sum')
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
-data = np.load('./save/data2.npy')
+orig_data = np.load('./save/data2.npy')
+
+def process_data(data):
+    n, l, w, h = data.shape
+    res = []
+    for i in range(0,l,10):
+        res.append(data[:,i:i+10])
+    
+    res = np.concatenate(res, axis=0)
+    
+    return res
+
+data = process_data(orig_data)
 
 n, l, w, h = data.shape
-model = Net
+model = Net()
 
 # if torch.cuda.device_count() > 0:
 #   print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -40,21 +52,17 @@ model_optim = optim.Adam(model.parameters(), lr=0.0001)
 
 index = np.arange(n)
 
-data = data.to(device).unsqueeze(2).unsqueeze(2)
+data = data.to(device)
 
 def getSequence(i):
     
-    input = data[i]
-    return input
+    x = data[i, :4]
+    y = data[i, 4:]
 
+    x = x.unsqueeze(0)
+    y = y.unsqueeze(0)
+    return x, y
 
-def dropotuInput(target, interval=10):
-    input = target.clone()
-    for i, image in enumerate(input):
-        if (i) % interval >= interval/2.0:
-            image.zero_()
-
-    return input
 
 from PIL import Image
 
@@ -65,9 +73,7 @@ def img_grey(data):
     return Image.fromarray(data * 255, mode='L').convert('1')
 
 def evaluate(weights,idx=0):
-    target = getSequence(idx)
-    input = dropotuInput(target, interval=10)
-
+    input, target = getSequence(idx)
 
     model.load_state_dict(weights)
 
@@ -82,7 +88,7 @@ def evaluate(weights,idx=0):
     input = input.cpu().numpy()
     output = output.cpu().numpy()
 
-    n, h, w = input.shape
+    n, h, w = target.shape
 
     for i in range(n):
         x = img_grey(target[i]>0.5)
@@ -93,12 +99,11 @@ def evaluate(weights,idx=0):
 
 
 def train():
-    target = getSequence(np.random.randint(n))
-    input = dropotuInput(target)
-    
-    output, hidden = model(input)
+    x, y = getSequence(np.random.randint(n))
+  
+    output, hidden = model(x)
 
-    loss = criterion(output, target)
+    loss = criterion(output, y)
 
     model_optim.zero_grad()
     loss.backward()
@@ -117,7 +122,7 @@ from tqdm import tqdm
 def main(args):
     total_cost = 0
 
-    log = 100
+    log = 1000
     epochs = args.epochs
 
     for k in tqdm(range(1, epochs+1)):

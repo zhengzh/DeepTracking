@@ -8,7 +8,7 @@ class Net(nn.Module):
 
         super(Net, self).__init__()
 
-        h = 64
+        h = 128
         self.l1 = nn.Conv2d(4, h, (3, 3), (1, 1), (1, 1), dilation=(1,1))
         self.l2 = nn.Conv2d(h, h, (3, 3), (1, 1), (3, 3), dilation=(3,3))
         self.l3 = nn.Conv2d(h, h, (3, 3), (1, 1), (9, 9), dilation=(9,9))
@@ -24,4 +24,4 @@ class Net(nn.Module):
         x = torch.relu(self.l3(x))
         x = torch.sigmoid(self.output(x))
 
-        return x
+        return x, []
