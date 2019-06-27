@@ -48,7 +48,8 @@ print('total parameters: %d' % count_parameters(model))
 data = torch.from_numpy(data).float()
 
 
-model_optim = optim.Adam(model.parameters(), lr=0.0001)
+# model_optim = optim.Adam(model.parameters(), lr=0.0001)
+model_optim = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
 
 index = np.arange(n)
 
@@ -125,6 +126,8 @@ def main(args):
     log = 1000
     epochs = args.epochs
 
+    avg_cost = []
+
     for k in tqdm(range(1, epochs+1)):
 
         cost = train()
@@ -132,8 +135,11 @@ def main(args):
         total_cost += cost
 
         if k % log == 0:
+            avg_cost.append(total_cost / log)
             print('Iteration % d, cost: %f' % (k, total_cost/log))
             total_cost = 0
+            plt.plot(avg_cost)
+            plt.savefig('loss.png')
             
             evaluate(model.state_dict())
             torch.save(model.state_dict(),  './save/weights/%d.dat' % (k))
