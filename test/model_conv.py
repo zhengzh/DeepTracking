@@ -134,4 +134,4 @@ class VGGNet(nn.Module):
         e4 = torch.relu(self.d4(e3, output_size=h2.shape))
         e5 = torch.sigmoid(self.d5(e4, output_size=h1.shape))
         
-        return e5, []
+        return e5, [h1, h2, h3, h4]
