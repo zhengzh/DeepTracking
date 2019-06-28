@@ -2,7 +2,7 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
-from model_conv import Net
+from model_conv import VGGNet as Net
 import numpy as np
 
 
