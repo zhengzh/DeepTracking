@@ -2,7 +2,7 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
-from model_conv import VGGNet as Net
+from model_conv import Net3 as Net
 import numpy as np
 
 
@@ -48,7 +48,7 @@ print('total parameters: %d' % count_parameters(model))
 data = torch.from_numpy(data).float()
 
 
-# model_optim = optim.Adam(model.parameters(), lr=0.0001)
+# model_optim = optim.Adam(model.parameters(), lr=0.00001)
 model_optim = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
 
 index = np.arange(n)
