@@ -84,9 +84,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generating moving ball')
     parser.add_argument('--num', type=int, default=100)
     parser.add_argument('--seq_len', type=int, default=50)
+    parser.add_argument('-w', type=int, default=50)
     
     args = parser.parse_args()
+    w = h = args.w
     generate_data(args)
 
     # test(balls)
-    
