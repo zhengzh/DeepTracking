@@ -3,7 +3,7 @@ from pylab import *
 
 import os
 
-num = 50
+num = 10
 ifs = ['input_%d.bmp' % (i) for i in range(0, num)]
 ofs = ['output_%d.bmp' % (i) for i in range(0, num)]
 
@@ -15,20 +15,21 @@ ops = [Image.open(d+i) for i in ofs]
 # figure(figsize=(20,20), dpi=96)
 # plt.rcParams['figure.figsize'] = [10, 5]
 
-fig, axes =plt.subplots(num//10,10, figsize=(10, 10), facecolor='w', edgecolor='k')
+row_num = 5
+fig, axes =plt.subplots(num//row_num,row_num, figsize=(10, 10), facecolor='w', edgecolor='k')
 
 for i, ipt in enumerate(ips):
-    ax = axes[i//10, i%10]
+    ax = axes[i//row_num, i%row_num]
     ax.imshow(ipt)
     ax.axis('off')
     ax.set_title('input%d'%(i))
 
 plt.savefig('inputs1.png')
 
-fig, axes =plt.subplots(num//10,10, figsize=(10, 10), facecolor='w', edgecolor='k')
+fig, axes =plt.subplots(num//row_num,row_num, figsize=(10, 10), facecolor='w', edgecolor='k')
 
 for i, ipt in enumerate(ops):
-    ax = axes[i//10, i%10]
+    ax = axes[i//row_num, i%row_num]
     ax.imshow(ipt)
     ax.axis('off')
     ax.set_title('outputs%d'%(i))

@@ -41,11 +41,12 @@ model_optim = optim.Adam(model.parameters(), lr=0.0001)
 
 index = np.arange(n)
 
-data = data.to(device).unsqueeze(2).unsqueeze(2)
+# data = data.to(device).unsqueeze(2).unsqueeze(2)
 
 def getSequence(i):
     
     input = data[i]
+    input = input.to(device).unsqueeze(1).unsqueeze(1)
     return input
 
 
