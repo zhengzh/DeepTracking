@@ -7,7 +7,19 @@ import math
 from math import pi
 import numpy as np
 
-class Params:
+
+class config:
+    # (x-gw/2)*g_step
+    gh = 100 # y
+    gw = 100 # x
+
+    ih = 100 # input width
+    iw = 100 # input height
+        
+    g_step= 0.1
+
+
+class Laser:
 
     def __init__(self, angle_min, angle_max, angle_increment):
 
@@ -15,18 +27,11 @@ class Params:
         self.angle_max = angle_max
         self.laser_step = angle_increment
 
-        self.num_beam = round((angle_max - angle_min)/angle_increment) + 1 # make it int
+        self.num_beam = round((angle_max - angle_min)/angle_increment)
 
-        self.gh = 400 # y
-        self.gw = 400 # x
-
-        self.ih = 200 # input width
-        self.iw = 200 # input height
         
-        self.g_step= 0.1
-        # (x-gw/2)*g_step
 
-params = Params(-1.5009831190109253, 1.4966198205947876, 0.004363323096185923)
+laser_param = Laser(-1.5009831190109253, 1.4966198205947876, 0.004363323096185923)
 
 
 # params = Params(-pi*0.7, pi*0.7, pi*0.01)
@@ -51,7 +56,7 @@ def get_lookup(params):
             angle = math.atan2(py, px)
             # grid -> distance, beam_index
             dist[y][x] = math.sqrt(px * px + py * py)
-            index[y][x] = int((pi_to_pi(angle) + pi) / laser_step) # -pi -> 0
+            index[y][x] = int((pi_to_pi(angle) + pi) / laser_step)
     
     return dist, index
 
@@ -67,17 +72,17 @@ def pi_to_pi(theta): # note [-pi, pi) !!
 PI_2 = 2 * math.pi
 grid_dist, grid_beam_index = get_lookup(params)
 
-def get_360_laser(laser, yaw, params):
+def get_360_laser(laser, yaw, laser_param):
 
-    laser_step = params.laser_step
+    laser_step = laser_param.laser_step
 
     n = int(PI_2 / laser_step)
     laser_360 = np.zeros(n)
 
-    start_angle = pi_to_pi(params.angle_min + yaw) + pi
+    start_angle = pi_to_pi(laser_param.angle_min + yaw) + pi
     start_index = int(start_angle/ laser_step)
 
-    index = np.arange(start_index, start_index+params.num_beam) % n
+    index = np.arange(start_index, start_index+laser_param.num_beam) % n
 
     laser_360[index] = laser
 
@@ -104,8 +109,7 @@ def get_input(obs, vis, dx, dy, ih, iw):
     big_map[:, sh:sh+gh, sw:sw+gw] = np.stack((obs, vis))
 
     sih = gh-ih//2
-    siw = gw-20
-    # siw = gw-iw//2
+    siw = gw-iw//2
     input = big_map[:, sih:sih+ih, siw:siw+iw]
 
     return input
@@ -142,7 +146,7 @@ def process_data(pos, laser, params):
     dx, dy, dyaw = pos[:, :, 0], pos[:, :, 1], pose[:, :, 2]
 
     n, l, _ = laser.shape
-    
+
     for i in range(n):
         for j in range(l):
             laser = laser[i, j, :]
@@ -174,35 +178,6 @@ def test():
     plt.imshow(vis, cmap='Greys')
 
 #%%
-
-
-def load_bag(bag_name):
-    angle_min, angle_max, angle_increment = None, None, None
-
-    ranges = []
-    count = 0
-    for topic, msg, t in rosbag.Bag(bag_name).read_messages():
-        if topic == '/scan':
-            if not angle_min:
-                angle_min = msg.angle_min
-                angle_max = msg.angle_max
-                angle_increment = msg.angle_increment
-
-            if count % 20 == 0:
-                ranges.append(msg.ranges)
-
-        count +=1
-    
-    rg = np.arrary(ranges)
-    
-    rg = np.where(rg > 0.01, rg, 50.)
-    return rg
-
-
-def generate_data():
-    pass
-
-
 
 def main():
     pass

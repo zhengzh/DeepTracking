@@ -20,6 +20,162 @@ class Net(nn.Module):
         
         # input_channel, output_channel, kernel, stride, padding, dialation
         self.output = nn.Conv2d(4*h, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output1 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output2 = nn.Conv2d(64, 6, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+
+
+
+    def forward(self, x):
+
+        h1 = torch.relu(self.l1(x))
+        h2 = torch.relu(self.l2(h1))
+        h3 = torch.relu(self.l3(h2))
+        h4 = torch.relu(self.l4(h3))
+
+        cat = torch.cat((h1, h2, h3, h4), 1)
+        # cat = h1 + h3
+
+        y = torch.relu(self.output(cat))
+        y = torch.relu(self.output1(y))
+        y = torch.sigmoid(self.output2(y))
+
+        return y, [h1, h2, h3, h4]
+
+
+class Net(nn.Module):
+    
+    def __init__(self):
+
+        super(Net, self).__init__()
+
+        h = 64
+        d1 = 1
+        d2 = 3
+        d3 = 9
+        d4 = 27
+        self.l1 = nn.Conv2d(4, h, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.l2 = nn.Conv2d(h, h, (3, 3), (1, 1), (d2, d2), dilation=(d2,d2))
+        self.l3 = nn.Conv2d(h, h, (3, 3), (1, 1), (d3, d3), dilation=(d3,d3))
+        self.l4 = nn.Conv2d(h, h, (3, 3), (1, 1), (d4, d4), dilation=(d4,d4))
+        
+        # input_channel, output_channel, kernel, stride, padding, dialation
+        self.output = nn.Conv2d(4*h, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output1 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output2 = nn.Conv2d(64, 6, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+
+
+
+    def forward(self, x):
+
+        h1 = torch.relu(self.l1(x))
+        h2 = torch.relu(self.l2(h1))
+        h3 = torch.relu(self.l3(h2))
+        h4 = torch.relu(self.l4(h3))
+
+        cat = torch.cat((h1, h2, h3, h4), 1)
+        # cat = h1 + h3
+
+        y = torch.relu(self.output(cat))
+        y = torch.relu(self.output1(y))
+        y = torch.sigmoid(self.output2(y))
+
+        return y, [h1, h2, h3, h4]
+
+BatchNorm = nn.BatchNorm2d
+
+def conv3x3(in_planes, out_planes, stride=1, padding=1, dilation=1):
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
+                     padding=padding, bias=False, dilation=dilation)
+
+class BasicBlock(nn.Module):
+    expansion = 1
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None,
+                 dilation=(1, 1), residual=True):
+        super(BasicBlock, self).__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride,
+                             padding=dilation[0], dilation=dilation[0])
+        self.bn1 = BatchNorm(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes,
+                             padding=dilation[1], dilation=dilation[1])
+        self.bn2 = BatchNorm(planes)
+        self.downsample = downsample
+        self.stride = stride
+        self.residual = residual
+
+    def forward(self, x):
+        residual = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.residual:
+            out += residual
+        out = self.relu(out)
+
+        return out
+
+
+class NetDRN(nn.Module):
+
+    def __init__(self):
+
+        super(NetDRN, self).__init__()
+
+        h = 32
+
+        self.conv1 = nn.Conv2d(4, h, 3, stride=1, padding=1)
+        self.l1 = BasicBlock(h, h, dilation=(1, 1))
+        self.l2 = BasicBlock(h, h, dilation=(2, 2))
+        self.l3 = BasicBlock(h, h, dilation=(4, 4))
+        self.l4 = BasicBlock(h, h, dilation=(8, 8))
+        self.l5 = BasicBlock(h, h, dilation=(16, 16))
+        self.l6 = BasicBlock(h, h, dilation=(32, 32))
+        # self.l6 = BasicBlock(h, h, dialation=(16, 32))
+        self.o1 = nn.Conv2d(h, h, 3, stride=1, padding=1)
+        self.o2 = nn.Conv2d(h, 6, 3, stride=1, padding=1)
+
+    def forward(self, x):
+
+        x = torch.relu(self.conv1(x))
+
+        x = self.l1(x)
+        x = self.l2(x)
+        x = self.l3(x)
+        x = self.l4(x)
+        x = self.l5(x)
+        x = self.l6(x)
+
+        x = torch.relu(self.o1(x))
+        x = torch.sigmoid(self.o2(x))
+
+        return x, None
+
+
+class NetTestDilation(nn.Module):
+    
+    # same result as small dilation
+    def __init__(self):
+
+        super(NetTestDilation, self).__init__()
+
+        h = 64
+        d1 = 1
+        d2 = 3
+        d3 = 9
+        d4 = 27
+        self.l1 = nn.Conv2d(4, h, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.l2 = nn.Conv2d(h, h, (3, 3), (1, 1), (d2, d2), dilation=(d2,d2))
+        self.l3 = nn.Conv2d(h, h, (3, 3), (1, 1), (d3, d3), dilation=(d3,d3))
+        self.l4 = nn.Conv2d(h, h, (3, 3), (1, 1), (d4, d4), dilation=(d4,d4))
+        
+        # input_channel, output_channel, kernel, stride, padding, dialation
+        self.output = nn.Conv2d(4*h, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
         self.output1 = nn.Conv2d(64, 6, (3, 3), (1, 1), (1, 1), dilation=(1,1))
 
 
@@ -40,11 +196,187 @@ class Net(nn.Module):
         return y, [h1, h2, h3, h4]
 
 
-class Net2(nn.Module):
+class Net(nn.Module):
     
     def __init__(self):
 
         super(Net, self).__init__()
+
+        h = 64
+        d1 = 1
+        d2 = 3
+        d3 = 9
+        d4 = 27
+        self.l1 = nn.Conv2d(4, h, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.l2 = nn.Conv2d(h, h, (3, 3), (1, 1), (d2, d2), dilation=(d2,d2))
+        self.l3 = nn.Conv2d(h, h, (3, 3), (1, 1), (d3, d3), dilation=(d3,d3))
+        self.l4 = nn.Conv2d(h, h, (3, 3), (1, 1), (d4, d4), dilation=(d4,d4))
+        
+        # input_channel, output_channel, kernel, stride, padding, dialation
+        self.output = nn.Conv2d(4*h, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output1 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output2 = nn.Conv2d(64, 6, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+
+
+
+    def forward(self, x):
+
+        h1 = torch.relu(self.l1(x))
+        h2 = torch.relu(self.l2(h1))
+        h3 = torch.relu(self.l3(h2))
+        h4 = torch.relu(self.l4(h3))
+
+        cat = torch.cat((h1, h2, h3, h4), 1)
+        # cat = h1 + h3
+
+        y = torch.relu(self.output(cat))
+        y = torch.relu(self.output1(y))
+        y = torch.sigmoid(self.output2(y))
+
+        return y, [h1, h2, h3, h4]
+
+
+class Net(nn.Module):
+    
+    def __init__(self):
+
+        super(Net, self).__init__()
+
+        h = 64
+        d1 = 1
+        d2 = 3
+        d3 = 9
+        d4 = 27
+        self.l1 = nn.Conv2d(4, h, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.l2 = nn.Conv2d(h, h, (3, 3), (1, 1), (d2, d2), dilation=(d2,d2))
+        self.l3 = nn.Conv2d(h, h, (3, 3), (1, 1), (d3, d3), dilation=(d3,d3))
+        self.l4 = nn.Conv2d(h, h, (3, 3), (1, 1), (d4, d4), dilation=(d4,d4))
+        
+        # input_channel, output_channel, kernel, stride, padding, dialation
+        self.output = nn.Conv2d(4*h, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output1 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output2 = nn.Conv2d(64, 6, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+
+
+
+    def forward(self, x):
+
+        h1 = torch.relu(self.l1(x))
+        h2 = torch.relu(self.l2(h1))
+        h3 = torch.relu(self.l3(h2))
+        h4 = torch.relu(self.l4(h3))
+
+        cat = torch.cat((h1, h2, h3, h4), 1)
+        # cat = h1 + h3
+
+        y = torch.relu(self.output(cat))
+        y = torch.relu(self.output1(y))
+        y = torch.sigmoid(self.output2(y))
+
+        return y, [h1, h2, h3, h4]
+
+class NetMulHead(nn.Module):
+    
+    # same result as small dilation
+    def __init__(self):
+
+        super(NetMulHead, self).__init__()
+
+        h = 32
+        d1 = 1
+        d2 = 3
+        d3 = 9
+        d4 = 27
+        self.l1 = nn.Conv2d(4, h, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.l2 = nn.Conv2d(h, h, (3, 3), (1, 1), (d2, d2), dilation=(d2,d2))
+        self.l3 = nn.Conv2d(h, h, (3, 3), (1, 1), (d3, d3), dilation=(d3,d3))
+        self.l4 = nn.Conv2d(h, h, (3, 3), (1, 1), (d4, d4), dilation=(d4,d4))
+        
+        # input_channel, output_channel, kernel, stride, padding, dialation
+
+        outputs = []
+        outputs1 = []
+        for i in range(6):
+            outputs.append(nn.Conv2d(h, h, (3, 3), (1, 1), (1, 1), dilation=(1,1)))
+            outputs1.append(nn.Conv2d(h, 1, (3, 3), (1, 1), (1, 1), dilation=(1,1)))
+
+        self.outputs = nn.ModuleList(outputs)
+        self.outputs1 = nn.ModuleList(outputs1)
+
+
+    def forward(self, x):
+
+        h1 = torch.relu(self.l1(x))
+        h2 = torch.relu(self.l2(h1))
+        h3 = torch.relu(self.l3(h2))
+        h4 = torch.relu(self.l4(h3))
+
+        # cat = torch.cat((h1, h2, h3, h4), 1)
+        # cat = h1 + h3
+
+        cat = h4
+
+        ys = []
+        for i in range(6):
+            y = torch.relu(self.outputs[i](cat))
+            y = torch.sigmoid(self.outputs1[i](y))
+            ys.append(y)
+
+        y = torch.cat(ys, 1)
+
+        return y, [h1, h2, h3, h4]
+
+class NetGridArtifact(nn.Module):
+    
+    # same result as small dilation
+    def __init__(self):
+
+        super(NetGridArtifact, self).__init__()
+
+        h = 64
+        d1 = 1
+        d2 = 3
+        d3 = 9
+        d4 = 27
+        self.l1 = nn.Conv2d(4, h, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.l2 = nn.Conv2d(h, h, (3, 3), (1, 1), (d2, d2), dilation=(d2,d2))
+        self.l3 = nn.Conv2d(h, h, (3, 3), (1, 1), (d3, d3), dilation=(d3,d3))
+        self.l4 = nn.Conv2d(h, h, (3, 3), (1, 1), (d4, d4), dilation=(d4,d4))
+        self.l5 = nn.Conv2d(h, h, (3, 3), (1, 1), d3, dilation=(d3,d3))
+        self.l6 = nn.Conv2d(h, h, (3, 3), (1, 1), d2, dilation=(d2,d2))
+        self.l7 = nn.Conv2d(h, h, (3, 3), (1, 1), d1, dilation=(d1,d1))
+        
+        # input_channel, output_channel, kernel, stride, padding, dialation
+        self.output = nn.Conv2d(h, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output1 = nn.Conv2d(64, 6, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+
+
+
+    def forward(self, x):
+
+        h1 = torch.relu(self.l1(x))
+        h2 = torch.relu(self.l2(h1))
+        h3 = torch.relu(self.l3(h2))
+        h4 = torch.relu(self.l4(h3))
+        h = torch.relu(self.l5(h4))
+        h = torch.relu(self.l6(h))
+        h = torch.relu(self.l7(h))
+
+        # cat = torch.cat((h1, h2, h3, h4), 1)
+        # cat = h1 + h3
+
+        cat = h
+        y = torch.relu(self.output(cat))
+        y = torch.sigmoid(self.output1(y))
+
+        return y, [h1, h2, h3, h4]
+
+
+class Net2(nn.Module):
+    
+    def __init__(self):
+
+        super(Net2, self).__init__()
 
         h = 64
         d1 = 1

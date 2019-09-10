@@ -104,7 +104,7 @@ class GRUCell(nn.Module):
 
         super(GRUCell, self).__init__()
 
-        hn = 64
+        hn = 16
         self.z = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
         self.r = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
         self.h = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
@@ -131,7 +131,7 @@ class GRURNN(nn.Module):
 
         super(GRURNN, self).__init__()
 
-        self.hn = 64
+        self.hn = 16
 
         self.l1 = GRUCell(1, 1, 1)
         self.l2 = GRUCell(2, self.hn, 2)

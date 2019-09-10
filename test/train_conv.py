@@ -2,7 +2,11 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
-from model_conv import Net3 as Net
+# from model_conv import NetTestDilation as Net
+from model_conv import NetMulHead as Net
+# from model_conv import NetGridArtifact as Net
+# from model_conv import Net2 as Net
+# from model_conv import NetDRN as Net
 import numpy as np
 
 
@@ -11,7 +15,7 @@ epochs = 1000
 criterion = nn.BCELoss(reduction='sum')
 
 
-device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
 
 orig_data = np.load('./save/data2.npy')
 
@@ -48,8 +52,8 @@ print('total parameters: %d' % count_parameters(model))
 data = torch.from_numpy(data).float()
 
 
-# model_optim = optim.Adam(model.parameters(), lr=0.00001)
-model_optim = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
+model_optim = optim.Adam(model.parameters(), lr=0.00001)
+# model_optim = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
 
 index = np.arange(n)
 
