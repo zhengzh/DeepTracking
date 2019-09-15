@@ -2,12 +2,15 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
+import ipdb
 # from model_conv import NetTestDilation as Net
 # from model_conv import NetMulHead as Net
 # from model_conv import NetGridArtifact as Net
-from model_conv import Net4 as Net
+# from model_conv import Net4 as Net
 # from model_conv import Net2 as Net
 # from model_conv import NetDRN2 as Net
+# from model_drn import drn_c_26 as Net
+from segnet import SegNet as Net
 # from model_conv import NetDRN as Net
 import numpy as np
 
@@ -43,7 +46,7 @@ data = process_data(orig_data)
 n, l, w, h = data.shape
 
 print("data: %d, %d, %d, %d" % (n, l, w, h))
-model = Net()
+model = Net(10, 10)
 
 # if torch.cuda.device_count() > 0:
 #   print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -94,7 +97,7 @@ def evaluate(weights,idx=0):
     model.load_state_dict(weights)
 
     with torch.no_grad():
-        output, hidden = model(input)
+        output = model(input)
     
     target = target.squeeze()
     input = input.squeeze()
@@ -117,7 +120,7 @@ def evaluate(weights,idx=0):
 def train():
     x, y = getSequence(np.random.randint(n))
   
-    output, hidden = model(x)
+    output = model(x)
 
     loss = criterion(output, y)
 

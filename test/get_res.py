@@ -3,7 +3,7 @@ from pylab import *
 
 import os
 
-num = 10
+num = 20
 ifs = ['input_%d.bmp' % (i) for i in range(0, num)]
 ofs = ['output_%d.bmp' % (i) for i in range(0, num)]
 

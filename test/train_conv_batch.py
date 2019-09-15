@@ -5,26 +5,25 @@ import torch.nn as nn
 # from model_conv import NetTestDilation as Net
 # from model_conv import NetMulHead as Net
 # from model_conv import NetGridArtifact as Net
-from model_conv import Net4 as Net
 # from model_conv import Net2 as Net
-# from model_conv import NetDRN2 as Net
 # from model_conv import NetDRN as Net
+# from model_conv import NetDRN3 as Net
+from model_conv import NetDRN4 as Net
 import numpy as np
 
 import argparse
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Generating moving ball')
-    parser.add_argument('--epochs', type=int, default=100000)
-    parser.add_argument('--lr', type=float, default=0.0001)
-    args = parser.parse_args()
+parser = argparse.ArgumentParser(description='Generating moving ball')
+parser.add_argument('--epochs', type=int, default=100000)
+parser.add_argument('--lr', type=float, default=0.0001)
+args = parser.parse_args()
 
 epochs = 1000
 
 criterion = nn.BCELoss(reduction='sum')
 
 
-device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:2' if torch.cuda.is_available() else 'cpu'
 
 orig_data = np.load('./save/data2.npy')
 
@@ -75,8 +74,8 @@ def getSequence(i):
     x = data[i, :l//2]
     y = data[i, l//2:]
 
-    x = x.unsqueeze(0)
-    y = y.unsqueeze(0)
+    # x = x.unsqueeze(0)
+    # y = y.unsqueeze(0)
     return x, y
 
 
@@ -89,7 +88,7 @@ def img_grey(data):
     return Image.fromarray(data * 255, mode='L').convert('1')
 
 def evaluate(weights,idx=0):
-    input, target = getSequence(idx)
+    input, target = getSequence([idx])
 
     model.load_state_dict(weights)
 
@@ -114,8 +113,9 @@ def evaluate(weights,idx=0):
         y.save('./save/video/output_%i.bmp' % (i))
 
 
+batch_size = 2
 def train():
-    x, y = getSequence(np.random.randint(n))
+    x, y = getSequence(np.random.randint(n, size=(batch_size)))
   
     output, hidden = model(x)
 
@@ -126,6 +126,17 @@ def train():
     model_optim.step() 
     
     return loss.item()
+
+def accuracy():
+    with torch.no_grad():
+        l = 0.0
+        for i in range(n):
+            x, y = getSequence(np.random.randint(n, size=(batch_size)))
+            output, hidden = model(x)
+            loss = criterion(output, y)
+            l += loss.item()
+
+    return l/n
 
 
 import os

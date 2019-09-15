@@ -3,7 +3,8 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 
-from model import GRURNN
+from model import ConvRNN as RNN
+# from model import GRURNN as RNN
 import numpy as np
 
 
@@ -17,7 +18,7 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 data = np.load('./save/data2.npy')
 
 n, l, w, h = data.shape
-model = GRURNN()
+model = RNN()
 
 # if torch.cuda.device_count() > 0:
 #   print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -37,7 +38,7 @@ print('total parameters: %d' % count_parameters(model))
 data = torch.from_numpy(data).float()
 
 
-model_optim = optim.Adam(model.parameters(), lr=0.0001)
+model_optim = optim.Adam(model.parameters(), lr=0.001)
 
 index = np.arange(n)
 
@@ -50,10 +51,11 @@ def getSequence(i):
     return input
 
 
-def dropotuInput(target, interval=10):
+def dropoutInput(target, interval=20):
     input = target.clone()
     for i, image in enumerate(input):
-        if (i) % interval >= interval/2.0:
+        # if (i) % interval >= interval/2.0:
+        if i >= interval/2.0:
             image.zero_()
 
     return input
@@ -68,7 +70,7 @@ def img_grey(data):
 
 def evaluate(weights,idx=0):
     target = getSequence(idx)
-    input = dropotuInput(target, interval=10)
+    input = dropoutInput(target)
 
 
     model.load_state_dict(weights)
@@ -96,7 +98,7 @@ def evaluate(weights,idx=0):
 
 def train():
     target = getSequence(np.random.randint(n))
-    input = dropotuInput(target)
+    input = dropoutInput(target)
     
     output, hidden = model(input)
 

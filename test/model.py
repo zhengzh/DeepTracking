@@ -38,6 +38,99 @@ class RNNCell(nn.Module):
 hn = 64
 # hn = 128
 
+class ConvRNNCell(nn.Module):
+
+    def __init__(self, x, h, dilation):
+        super(ConvRNNCell, self).__init__()
+
+        self.l = nn.Conv2d(x+h, h, 3, 1, padding=dilation, dilation=dilation)
+
+    def forward(self, x, h):
+
+        x = torch.cat((x, h), 1)
+
+        return torch.relu(self.l(x))
+
+
+class ConvRNN(nn.Module):
+
+    def __init__(self):
+        super(ConvRNN, self).__init__()
+
+        self.hn = hn = 16
+        self.l1 = ConvRNNCell(1, hn, 1)
+        self.l2 = ConvRNNCell(hn, hn, 2)
+        self.l3 = ConvRNNCell(hn, hn, 4)
+
+        self.out = nn.Conv2d(self.hn, 1, (3, 3), stride=(1, 1), padding=(1, 1))
+
+    def forward(self, X):
+
+        # x is [batch, channel, width, height]
+        sh = list(X[0].shape)
+        sh[1] = self.hn
+        h0 = X[0].new_zeros(sh)
+        h3 = h1 = h2 = h0
+    
+        h_list = []
+        y_list = []
+        seq_len = X.shape[0]
+
+        for i in range(seq_len):
+            
+            h0 = self.l1(X[i], h0)
+            h1 = self.l2(h0, h1)
+            h2 = self.l3(h1, h2)
+
+            out = torch.sigmoid(self.out(h2))
+
+            h_list.append([h0, h1, h2])
+            y_list.append(out)
+
+        y = torch.stack(y_list)
+
+        return y, h_list
+
+
+class ConvRNN2(nn.Module):
+
+    def __init__(self):
+        super(ConvRNN2, self).__init__()
+
+        self.hn = hn = 8
+        self.l1 = ConvRNNCell(1, hn, 1)
+        self.l2 = ConvRNNCell(hn, hn, 2)
+        self.l3 = ConvRNNCell(hn, hn, 4)
+
+        self.out = nn.Conv2d(self.hn, 1, (3, 3), stride=(1, 1), padding=(1, 1))
+
+    def forward(self, X):
+
+        # x is [batch, channel, width, height]
+        sh = list(X[0].shape)
+        sh[1] = self.hn
+        h0 = X[0].new_zeros(sh)
+        h3 = h1 = h2 = h0
+    
+        h_list = []
+        y_list = []
+        seq_len = X.shape[0]
+
+        for i in range(seq_len):
+            
+            h0 = self.l1(X[i], h0)
+            h1 = self.l2(h0, h1)
+            h2 = self.l3(h1, h2)
+
+            out = torch.sigmoid(self.out(h2))
+
+            h_list.append([h0, h1, h2])
+            y_list.append(out)
+
+        y = torch.stack(y_list)
+
+        return y, h_list
+
 class RNNCell2(nn.Module):
     
     def __init__(self):
@@ -100,14 +193,14 @@ class RNNCell3(nn.Module):
 
 class GRUCell(nn.Module):
     
-    def __init__(self, dil, xn, pad):
+    def __init__(self, dil, xn):
 
         super(GRUCell, self).__init__()
 
-        hn = 16
-        self.z = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
-        self.r = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
-        self.h = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (pad,pad), dilation=(dil, dil))
+        hn = 8
+        self.z = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (dil,dil), dilation=(dil, dil), bias=True)
+        self.r = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (dil,dil), dilation=(dil, dil), bias=True)
+        self.h = nn.Conv2d(hn+xn, hn,(3, 3), (1,1), (dil,dil), dilation=(dil, dil), bias=True)
     
     
     def forward(self, x, h):
@@ -131,11 +224,15 @@ class GRURNN(nn.Module):
 
         super(GRURNN, self).__init__()
 
-        self.hn = 16
+        self.hn = hn = 8
 
-        self.l1 = GRUCell(1, 1, 1)
-        self.l2 = GRUCell(2, self.hn, 2)
-        self.l3 = GRUCell(4, self.hn, 4)
+        self.l1 = GRUCell(1, 1)
+        self.l2 = GRUCell(2, self.hn)
+        self.l3 = GRUCell(4, self.hn)
+        # self.l4 = GRUCell(, self.hn, 27)
+
+        self.out1 = nn.Conv2d(self.hn, hn, 3, padding=2, dilation=2)
+        self.out2 = nn.Conv2d(self.hn, hn, 3, padding=1, dilation=1)
 
         self.out = nn.Conv2d(self.hn, 1, (3, 3), stride=(1, 1), padding=(1, 1))
     
@@ -145,7 +242,7 @@ class GRURNN(nn.Module):
         sh = list(X[0].shape)
         sh[1] = self.hn
         h0 = X[0].new_zeros(sh)
-        h1 = h2 = h0
+        h3 = h1 = h2 = h0
     
         h_list = []
         y_list = []
@@ -156,8 +253,13 @@ class GRURNN(nn.Module):
             h0 = self.l1(X[i], h0)
             h1 = self.l2(h0, h1)
             h2 = self.l3(h1, h2)
-            y = torch.sigmoid(self.out(h2))
-            h_list.append([h0, h1, h2])
+            # h3 = self.l4(h2, h3)
+            
+            y = torch.relu(self.out1(h2))
+            y = torch.relu(self.out2(y))
+            # y = torch.relu(self.out3(y))
+            y = torch.sigmoid(self.out(y))
+            h_list.append([h0, h1, h2, h3])
             y_list.append(y)
 
         y = torch.stack(y_list)

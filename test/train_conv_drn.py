@@ -5,9 +5,10 @@ import torch.nn as nn
 # from model_conv import NetTestDilation as Net
 # from model_conv import NetMulHead as Net
 # from model_conv import NetGridArtifact as Net
-from model_conv import Net4 as Net
+# from model_conv import Net4 as Net
 # from model_conv import Net2 as Net
 # from model_conv import NetDRN2 as Net
+from model_drn import drn_c_26 as Net
 # from model_conv import NetDRN as Net
 import numpy as np
 
