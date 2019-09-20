@@ -24,7 +24,7 @@ epochs = 1000
 criterion = nn.BCELoss(reduction='sum')
 
 
-device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:3' if torch.cuda.is_available() else 'cpu'
 
 orig_data = np.load('./save/data2.npy')
 

@@ -48,10 +48,9 @@ class Net4(nn.Module):
 
         super(Net4, self).__init__()
 
-        h = 16
         dil = [1, 3, 9, 27, 9, 3]
         # cha = [16, 64, 64, 64, 64, 64]
-        cha = [16, 16, 16, 16, 16, 16]
+        cha = [32, 32, 32, 32, 32, 32]
         # self.l1 = nn.Conv2d(10, cha[0], (3, 3), (1, 1), (1, 1), dilation=(1,1))
         # self.l2 = nn.Conv2d(cha[0], cha[1], (3, 3), (1, 1), (d2, d2), dilation=(d2,d2))
         # self.l3 = nn.Conv2d(cha[1], cha[2], (3, 3), (1, 1), (d3, d3), dilation=(d3,d3))
@@ -62,13 +61,13 @@ class Net4(nn.Module):
         self.l2 = self.conv3(cha[0], cha[1], dil[1])
         self.l3 = self.conv3(cha[1], cha[2], dil[2])
         self.l4 = self.conv3(cha[2], cha[3], dil[3])
-        self.l5 = self.conv3(cha[3], cha[4], dil[4])
-        self.l6 = self.conv3(cha[4], cha[5], dil[5])
+        # self.l5 = self.conv3(cha[3], cha[4], dil[4])
+        # self.l6 = self.conv3(cha[4], cha[5], dil[5])
         
         # input_channel, output_channel, kernel, stride, padding, dialation
-        self.output = nn.Conv2d(96, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
-        self.output1 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
-        self.output2 = nn.Conv2d(64, 10, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output = nn.Conv2d(32, 64, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        self.output1 = nn.Conv2d(64, 10, (3, 3), (1, 1), (1, 1), dilation=(1,1))
+        # self.output2 = nn.Conv2d(64, 10, (3, 3), (1, 1), (1, 1), dilation=(1,1))
 
 
     def conv3(self, inplanes, planes, dilation):
@@ -80,16 +79,16 @@ class Net4(nn.Module):
         h2 = torch.relu(self.l2(h1))
         h3 = torch.relu(self.l3(h2))
         h4 = torch.relu(self.l4(h3))
-        h5 = torch.relu(self.l5(h4))
-        h6 = torch.relu(self.l6(h5))
+        # h5 = torch.relu(self.l5(h4))
+        # h6 = torch.relu(self.l6(h5))
 
-        cat = torch.cat((h1, h2, h3, h4, h5, h6), 1)
+        # cat = torch.cat((h1, h2, h3, h4, h5, h6), 1)
         # cat = h1 + h3
 
-        # cat = h4
+        cat = h4
         y = torch.relu(self.output(cat))
-        y = torch.relu(self.output1(y))
-        y = torch.sigmoid(self.output2(y))
+        # y = torch.relu(self.output1(y))
+        y = torch.sigmoid(self.output1(y))
 
         return y, [h1, h2, h3, h4]
 
