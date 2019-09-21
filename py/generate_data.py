@@ -42,10 +42,11 @@ def generate_data(bag_name, num=-1):
     return rg
 
 
-bag_name = 'shitang'
-rg = generate_data(bag_name)
+if __name__ == "__main__":
+    bag_name = 'shitang'
+    rg = generate_data(bag_name)
 
-print('saving...')
-np.save('./data/%s' % (bag_name), rg)
+    print('saving...')
+    np.save('./data/%s' % (bag_name), rg)
 
 
